@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Ensure Python recognizes 'src' as a package
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import tkinter as tk
 from tkinter import messagebox
 from src.database import HabitDatabase

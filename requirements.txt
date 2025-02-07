@@ -1,0 +1,21 @@
+# Essential Dependencies
+python==3.12  # Specify Python version if needed
+
+# Database
+sqlite3  # For managing habit data storage
+
+# UI (If using Tkinter or another GUI)
+tk  # If you're using Tkinter for GUI
+
+# Data Analysis
+pandas  # For handling habit tracking data
+numpy  # For numerical operations
+
+# Logging & Debugging
+logging  # Standard logging library
+
+# Testing
+pytest  # Unit testing for habit tracking
+
+# Additional Dependencies (if applicable)
+matplotlib  # If you want visual habit tracking analytics

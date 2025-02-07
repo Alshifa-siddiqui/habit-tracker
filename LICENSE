@@ -1,21 +1,49 @@
-MIT License
+# Habit Tracker 📊🎯
 
-Copyright (c) 2025 Alshifa-siddiqui
+A **Habit Tracking App** built using **Python, OOP, Functional Programming, and SQLite** for analytics and tracking.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 📌 Features:
+- Track your daily habits ✅
+- Analyze habit patterns 📊
+- View progress over time 📅
+- User-friendly interface 🎨
+- Stores data in SQLite 🗃️
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## 🏗️ Project Structure:
+habit-tracker/
+│── src/
+│   ├── app.py            # Main script for running the application
+│   ├── database.py       # Handles SQLite database interactions
+│   ├── habit.py          # Defines the Habit class and its methods
+│   ├── analytics.py      # Functional programming logic for habit analysis
+│   ├── gui.py            # Manages the Tkinter-based UI
+│── tests/
+│   ├── test_habit.py     # Unit tests for the Habit class
+│   ├── test_database.py  # Tests for database queries
+│── docs/                 # Documentation and diagrams
+│   ├── user_flowchart.png 
+│   ├── component_diagram.png
+│── assets/               # Stores images, icons, or any UI elements
+│── config.json           # Stores configuration settings
+│── setup.py              # Helps with packaging and installation
+│── requirements.txt      # Dependencies
+│── LICENSE               # License file
+│── .gitignore            # Git ignore file
+│── README.md             # Project description
+## 🛠️ Tech Stack:
+- **Python** 🐍
+- **SQLite** 🗄️
+- **Tkinter (GUI)** 🖥️
+- **Object-Oriented & Functional Programming** 🔄
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## 🚀 How to Run:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Alshifa-siddiqui/habit-tracker.git
+2. Install dependencies:
+    pip install -r requirements.txt
+3. Run the application:
+    python src/app.py
+    
+📜 License:
+This project is licensed under the MIT License.

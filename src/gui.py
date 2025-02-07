@@ -13,8 +13,8 @@ class HabitTrackerGUI:
         """Initialize the GUI and connect to the database."""
         self.root = root
         self.root.title("Habit Tracker")
-        self.root.geometry("400x300")  # Set window size
-        self.root.configure(bg="#f7f7f7")  # Background color
+        self.root.geometry("420x350")  # Slightly bigger window
+        self.root.configure(bg="#f7f7f7")  # Light background
 
         self.db = HabitDatabase()
         self.analytics = HabitAnalytics()
@@ -23,28 +23,31 @@ class HabitTrackerGUI:
         frame = tk.Frame(root, padx=20, pady=20, bg="#f7f7f7")
         frame.pack(expand=True)
 
+        # Habit Name
         tk.Label(frame, text="Habit Name:", font=("Arial", 12), bg="#f7f7f7").grid(row=0, column=0, sticky="w", pady=5)
-        self.habit_entry = tk.Entry(frame, width=30, font=("Arial", 12))
-        self.habit_entry.grid(row=0, column=1, pady=5)
+        self.habit_entry = tk.Entry(frame, width=35, font=("Arial", 12))  # Wider input
+        self.habit_entry.grid(row=0, column=1, pady=5, padx=5)
 
+        # Frequency
         tk.Label(frame, text="Frequency (Daily/Weekly):", font=("Arial", 12), bg="#f7f7f7").grid(row=1, column=0, sticky="w", pady=5)
-        self.frequency_entry = tk.Entry(frame, width=30, font=("Arial", 12))
-        self.frequency_entry.grid(row=1, column=1, pady=5)
+        self.frequency_entry = tk.Entry(frame, width=35, font=("Arial", 12))  # Wider input
+        self.frequency_entry.grid(row=1, column=1, pady=5, padx=5)
 
-        # Buttons
-        btn_style = {"font": ("Arial", 12), "width": 20, "bg": "#4CAF50", "fg": "white"}
+        # Button Styling
+        btn_style = {"font": ("Arial", 12, "bold"), "width": 22, "bg": "#4CAF50", "fg": "white", "bd": 3, "relief": "raised"}
 
+        # Buttons with better spacing
         self.add_button = tk.Button(frame, text="Add Habit", command=self.add_habit, **btn_style)
-        self.add_button.grid(row=2, column=0, columnspan=2, pady=5)
+        self.add_button.grid(row=2, column=0, columnspan=2, pady=8)
 
         self.list_button = tk.Button(frame, text="Show Habits", command=self.show_habits, **btn_style)
-        self.list_button.grid(row=3, column=0, columnspan=2, pady=5)
+        self.list_button.grid(row=3, column=0, columnspan=2, pady=8)
 
         self.check_button = tk.Button(frame, text="Mark Habit Complete", command=self.mark_habit_complete, **btn_style)
-        self.check_button.grid(row=4, column=0, columnspan=2, pady=5)
+        self.check_button.grid(row=4, column=0, columnspan=2, pady=8)
 
         self.stats_button = tk.Button(frame, text="Show Statistics", command=self.show_statistics, **btn_style)
-        self.stats_button.grid(row=5, column=0, columnspan=2, pady=5)
+        self.stats_button.grid(row=5, column=0, columnspan=2, pady=8)
 
     def add_habit(self):
         """Add a new habit to the database."""

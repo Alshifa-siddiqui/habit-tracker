@@ -1,8 +1,14 @@
 import sys
+import os
+
+# Ensure Python recognizes 'src' as a package
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.database import HabitDatabase
 from src.analytics import HabitAnalytics
 from src.gui import HabitTrackerGUI
 import tkinter as tk
+
 
 def main():
     db = HabitDatabase()

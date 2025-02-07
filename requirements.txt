@@ -1,21 +1,23 @@
-# Essential Dependencies
-python==3.12  # Specify Python version if needed
+# Specify Python version if needed
+python==3.12
 
 # Database
-sqlite3  # For managing habit data storage
+sqlite3  # Built-in with Python, but listed for clarity
 
-# UI (If using Tkinter or another GUI)
-tk  # If you're using Tkinter for GUI
+# UI (if using Tkinter)
+tk  # Required only if using a GUI
 
-# Data Analysis
-pandas  # For handling habit tracking data
-numpy  # For numerical operations
+# Data Analysis & Visualization
+numpy~=1.26.4
+pandas~=2.1.4
+matplotlib~=3.9.2
 
-# Logging & Debugging
-logging  # Standard logging library
+# Testing & Code Coverage
+pytest~=7.4.4
+coverage~=7.4.3  # For measuring test coverage
 
-# Testing
-pytest  # Unit testing for habit tracking
+# Logging & Debugging (Optional)
+logging  # Built-in, no need to install separately
 
-# Additional Dependencies (if applicable)
-matplotlib  # If you want visual habit tracking analytics
+# User Input Handling (If needed)
+questionary~=2.0.1  # Helps with CLI interactive prompts

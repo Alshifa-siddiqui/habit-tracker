@@ -1,0 +1,17 @@
+{
+    "database": "habit_tracker.db",
+    "default_habits": [
+        "Exercise",
+        "Meditation",
+        "Reading",
+        "Water Intake"
+    ],
+    "logging": {
+        "enabled": true,
+        "log_file": "app.log"
+    },
+    "ui": {
+        "theme": "dark",
+        "language": "en"
+    }
+}

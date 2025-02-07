@@ -149,11 +149,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ## 📧 Contact
 
-For any questions or suggestions, feel free to contact me at **your-email@example.com**.
+For any questions or suggestions, feel free to contact me at **siddiqui21shifa@gmail.com**.
 
 ---
 
-🔥 **Now, your README is professional, structured, and informative!** 🚀
-
-Upload this file to `README.md` in your GitHub repository, and your project page will look polished and well-documented!
 

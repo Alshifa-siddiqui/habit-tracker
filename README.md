@@ -24,7 +24,7 @@ This application is designed to help users **track their habits**, monitor progr
 Ensure you have **Git installed**, then run:
 
 ```sh
- git clone https://github.com/YourUsername/habit-tracker.git
+git clone https://github.com/YourUsername/habit-tracker.git
 ```
 
 ### **2. Create a Virtual Environment (Recommended)**
@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🏗 Project Structure
+## 🏰 Project Structure
 
 ```sh
 habit-tracker/
@@ -67,8 +67,6 @@ habit-tracker/
 ├── docs/                     # Documentation and diagrams
 │   ├── user_flowchart.png     # User interaction flowchart
 │   ├── component_diagram.png  # Module interaction diagram
-│
-├── assets/                   # Stores images, icons, or any UI elements
 │
 ├── config.json               # Stores configuration settings
 ├── setup.py                  # Helps with packaging and installation
@@ -141,7 +139,7 @@ Want to improve the project? Follow these steps:
 
 ---
 
-## 📜 License
+## 📝 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
@@ -152,5 +150,4 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 For any questions or suggestions, feel free to contact me at **siddiqui21shifa@gmail.com**.
 
 ---
-
 

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from collections import Counter
-from src.database import HabitDatabase
+from database import HabitDatabase
 
 class HabitAnalytics:
     def __init__(self):

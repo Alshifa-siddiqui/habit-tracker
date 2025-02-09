@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 from database import HabitDatabase
-from analytics import HabitAnalytics
+from src.analytics import HabitAnalytics
 
 class HabitTrackerGUI:
     def __init__(self, root):

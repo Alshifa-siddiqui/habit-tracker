@@ -1,57 +1,80 @@
 import sqlite3
+import datetime
 
 class HabitDatabase:
-    def __init__(self, db_name="habits.db"):
-        """Initialize database connection."""
-        self.conn = sqlite3.connect(db_name)
+    def __init__(self):
+        """Connect to the SQLite database and create tables if they don't exist."""
+        self.conn = sqlite3.connect("habits.db")
         self.cursor = self.conn.cursor()
         self.create_tables()
 
     def create_tables(self):
-        """Create tables if they don't exist."""
+        """Create tables for habits and check-ins."""
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS habits (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                frequency TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                frequency TEXT NOT NULL
             )
         """)
         self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS habit_tracking (
+            CREATE TABLE IF NOT EXISTS check_ins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 habit_id INTEGER NOT NULL,
-                checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (habit_id) REFERENCES habits (id) ON DELETE CASCADE
+                date DATE NOT NULL,
+                FOREIGN KEY (habit_id) REFERENCES habits (id)
             )
         """)
         self.conn.commit()
 
     def add_habit(self, name, frequency):
-        """Add a new habit."""
+        """Insert a new habit into the database."""
         self.cursor.execute("INSERT INTO habits (name, frequency) VALUES (?, ?)", (name, frequency))
         self.conn.commit()
 
-    def delete_habit(self, habit_id):
-        """Delete a habit by ID."""
-        self.cursor.execute("DELETE FROM habits WHERE id=?", (habit_id,))
-        self.conn.commit()
-
     def get_habits(self):
-        """Retrieve all habits."""
-        self.cursor.execute("SELECT * FROM habits")
+        """Retrieve all habits from the database."""
+        self.cursor.execute("SELECT id, name, frequency FROM habits")
         return self.cursor.fetchall()
 
     def check_habit(self, habit_id):
-        """Mark a habit as completed."""
-        self.cursor.execute("INSERT INTO habit_tracking (habit_id) VALUES (?)", (habit_id,))
+        """Mark a habit as completed by adding a check-in date."""
+        today = datetime.date.today()
+        self.cursor.execute("INSERT INTO check_ins (habit_id, date) VALUES (?, ?)", (habit_id, today))
         self.conn.commit()
 
-    def get_habit_history(self, habit_id):
-        """Get tracking history of a habit."""
-        self.cursor.execute("SELECT * FROM habit_tracking WHERE habit_id=?", (habit_id,))
+    def get_active_habits(self):
+        """Retrieve only active habits (habits that have not been completed today)."""
+        today = datetime.date.today()
+        self.cursor.execute("""
+            SELECT id, name, frequency FROM habits 
+            WHERE id NOT IN (SELECT habit_id FROM check_ins WHERE date = ?)
+        """, (today,))
         return self.cursor.fetchall()
 
-    def close(self):
-        """Close database connection."""
+    def get_streak(self, habit_id):
+        """Calculate the streak for a habit based on consecutive check-ins."""
+        self.cursor.execute("SELECT date FROM check_ins WHERE habit_id = ? ORDER BY date DESC", (habit_id,))
+        dates = [datetime.datetime.strptime(row[0], "%Y-%m-%d").date() for row in self.cursor.fetchall()]
+
+        if not dates:
+            return 0  # No check-ins, no streak
+
+        streak = 1
+        for i in range(len(dates) - 1):
+            if (dates[i] - dates[i + 1]).days == 1:  # Check if check-ins are consecutive
+                streak += 1
+            else:
+                break  # Streak is broken
+
+        return streak
+
+    def remove_habit(self, habit_id):
+        """Remove a habit and its check-ins from the database."""
+        self.cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+        self.cursor.execute("DELETE FROM check_ins WHERE habit_id = ?", (habit_id,))
+        self.conn.commit()
+
+    def close_connection(self):
+        """Close the database connection."""
         self.conn.close()

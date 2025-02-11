@@ -9,7 +9,7 @@ class HabitDatabase:
         self.create_tables()
 
     def create_tables(self):
-        """Create tables for habits and check-ins with timestamps."""
+        """Create tables for habits and check-ins."""
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS habits (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +22,6 @@ class HabitDatabase:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 habit_id INTEGER NOT NULL,
                 date DATE NOT NULL,
-                time TEXT NOT NULL,
                 FOREIGN KEY (habit_id) REFERENCES habits (id)
             )
         """)
@@ -33,26 +32,49 @@ class HabitDatabase:
         self.cursor.execute("INSERT INTO habits (name, frequency) VALUES (?, ?)", (name, frequency))
         self.conn.commit()
 
+    def get_habits(self):
+        """Retrieve all habits from the database."""
+        self.cursor.execute("SELECT id, name, frequency FROM habits")
+        return self.cursor.fetchall()
+
     def check_habit(self, habit_id):
-        """Mark a habit as completed with timestamp."""
+        """Mark a habit as completed by adding a check-in date."""
         today = datetime.date.today()
-        current_time = datetime.datetime.now().strftime("%H:%M:%S")  # Get the current time
-        self.cursor.execute("INSERT INTO check_ins (habit_id, date, time) VALUES (?, ?, ?)", (habit_id, today, current_time))
+        self.cursor.execute("INSERT INTO check_ins (habit_id, date) VALUES (?, ?)", (habit_id, today))
         self.conn.commit()
 
-    def get_habit_check_ins(self, habit_id):
-        """Get all check-ins for a habit (Date & Time)."""
-        self.cursor.execute("SELECT date, time FROM check_ins WHERE habit_id = ? ORDER BY date DESC", (habit_id,))
+    def get_active_habits(self):
+        """Retrieve only active habits (habits that have not been completed today)."""
+        today = datetime.date.today()
+        self.cursor.execute("""
+            SELECT id, name, frequency FROM habits 
+            WHERE id NOT IN (SELECT habit_id FROM check_ins WHERE date = ?)
+        """, (today,))
         return self.cursor.fetchall()
 
-    def get_weekly_summary(self):
-        """Generate a weekly summary of completed habits."""
-        seven_days_ago = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
-        self.cursor.execute("""
-            SELECT habits.name, COUNT(check_ins.id) 
-            FROM check_ins 
-            JOIN habits ON habits.id = check_ins.habit_id 
-            WHERE check_ins.date >= ? 
-            GROUP BY habits.name
-        """, (seven_days_ago,))
-        return self.cursor.fetchall()
+    def get_streak(self, habit_id):
+        """Calculate the streak for a habit based on consecutive check-ins."""
+        self.cursor.execute("SELECT date FROM check_ins WHERE habit_id = ? ORDER BY date DESC", (habit_id,))
+        dates = [datetime.datetime.strptime(row[0], "%Y-%m-%d").date() for row in self.cursor.fetchall()]
+
+        if not dates:
+            return 0  # No check-ins, no streak
+
+        streak = 1
+        for i in range(len(dates) - 1):
+            if (dates[i] - dates[i + 1]).days == 1:  # Check if check-ins are consecutive
+                streak += 1
+            else:
+                break  # Streak is broken
+
+        return streak
+
+    def remove_habit(self, habit_id):
+        """Remove a habit and its check-ins from the database."""
+        self.cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+        self.cursor.execute("DELETE FROM check_ins WHERE habit_id = ?", (habit_id,))
+        self.conn.commit()
+
+    def close_connection(self):
+        """Close the database connection."""
+        self.conn.close()

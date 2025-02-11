@@ -74,7 +74,12 @@ class HabitAnalytics:
 
         report = "📊 Habit Tracker Report\n\n"
         for habit in habits:
-            habit_id, name, frequency, _ = habit
+            if len(habit) == 4:
+                habit_id, name, frequency, _ = habit
+            elif len(habit) == 3:  # If there's no fourth value
+                habit_id, name, frequency = habit
+                _ = None  # Assign a default value
+
             longest_streak = self.get_longest_streak(habit_id)
             check_ins = len(self.db.get_habit_history(habit_id))
 

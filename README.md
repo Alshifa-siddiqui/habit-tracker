@@ -1,7 +1,3 @@
-Here’s your **fully updated `README.md`** with **clear explanations, diagrams, and a well-structured layout**. After this, I'll guide you on what to do next.
-
----
-
 # 📝 **Habit Tracker**  
 _A powerful habit-tracking app with analytics and progress tracking._
 

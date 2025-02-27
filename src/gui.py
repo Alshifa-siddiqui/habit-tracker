@@ -1,11 +1,5 @@
 import sys
 import os
-import sys
-import os
-
-# Add the src directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import tkinter as tk
 from tkinter import messagebox
 from src.database import HabitDatabase
@@ -16,60 +10,154 @@ class HabitTrackerGUI:
         """Initialize the GUI and connect to the database."""
         self.root = root
         self.root.title("Habit Tracker")
+        self.root.geometry("400x500")
+        self.root.configure(bg="#F8F9FA")
+        
         self.db = HabitDatabase()
         self.analytics = HabitAnalytics()
 
-        # UI Elements
-        tk.Label(root, text="Habit Name:").grid(row=0, column=0, padx=10, pady=5)
-        self.habit_entry = tk.Entry(root)
-        self.habit_entry.grid(row=0, column=1, padx=10, pady=5)
+        # Fonts
+        self.font_title = ("Montserrat", 16, "bold")
+        self.font_normal = ("Montserrat", 12)
 
-        tk.Label(root, text="Frequency (Daily/Weekly):").grid(row=1, column=0, padx=10, pady=5)
-        self.frequency_entry = tk.Entry(root)
-        self.frequency_entry.grid(row=1, column=1, padx=10, pady=5)
+        # Create Welcome Screen
+        self.create_welcome_screen()
+    
+    def delete_habit(self):
+        """Delete a habit from the database."""
+    habit_id = self.habit_entry.get().strip()
+    
+    if habit_id.isdigit():
+        habit_id = int(habit_id)
+        self.db.remove_habit(habit_id)  # Use remove_habit instead of delete_habit
+        messagebox.showinfo("Success", f"Habit {habit_id} deleted successfully!")
+        self.create_welcome_screen()  # Refresh UI
+    else:
+        messagebox.showwarning("Warning", "Please enter a valid habit ID.")
 
-        tk.Button(root, text="Add Habit", command=self.add_habit, bg="green", fg="white").grid(row=2, column=0, columnspan=2, pady=5)
-        tk.Button(root, text="Show Habits", command=self.show_habits, bg="blue", fg="white").grid(row=3, column=0, columnspan=2, pady=5)
-        tk.Button(root, text="Mark Habit Complete", command=self.mark_habit_complete, bg="orange", fg="white").grid(row=4, column=0, columnspan=2, pady=5)
-        tk.Button(root, text="Show Statistics", command=self.show_statistics, bg="purple", fg="white").grid(row=5, column=0, columnspan=2, pady=5)
-        tk.Button(root, text="Exit", command=root.quit, bg="red", fg="white").grid(row=6, column=0, columnspan=2, pady=5)
 
-    def add_habit(self):
-        """Add a new habit to the database."""
+
+    def create_welcome_screen(self):
+        """Show the welcome screen with main options."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        delete_btn = tk.Button(self.root, text="Delete Habit", font=self.font_normal, 
+                       command=self.delete_habit, bg="red", fg="white")
+        delete_btn.pack(pady=10)
+
+
+        tk.Label(self.root, text="Habit Tracker", font=self.font_title, bg="#F8F9FA").pack(pady=20)
+
+        tk.Button(self.root, text="Create a Habit", font=self.font_normal, bg="#28A745", fg="white", 
+                  command=self.create_habit_screen, padx=10, pady=8).pack(pady=10, fill="x", padx=50)
+
+        tk.Button(self.root, text="View Habits", font=self.font_normal, bg="#007BFF", fg="white",
+                  command=self.show_habits, padx=10, pady=8).pack(pady=10, fill="x", padx=50)
+
+        tk.Button(self.root, text="Exit", font=self.font_normal, bg="#DC3545", fg="white", 
+                  command=self.root.quit, padx=10, pady=8).pack(pady=10, fill="x", padx=50)
+
+    def create_habit_screen(self):
+        """Screen to add a new habit."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.root, text="Create a Habit", font=self.font_title, bg="#F8F9FA").pack(pady=20)
+
+        tk.Label(self.root, text="Habit Name:", font=self.font_normal, bg="#F8F9FA").pack()
+        self.habit_entry = tk.Entry(self.root, font=self.font_normal)
+        self.habit_entry.pack(pady=5, padx=20, fill="x")
+
+        tk.Label(self.root, text="Frequency:", font=self.font_normal, bg="#F8F9FA").pack()
+        self.frequency_var = tk.StringVar(self.root)
+        self.frequency_var.set("Daily")  # Default value
+        tk.OptionMenu(self.root, self.frequency_var, "Daily", "Weekly", "Monthly").pack(pady=5)
+
+        tk.Button(self.root, text="Next", font=self.font_normal, bg="#007BFF", fg="white", 
+                  command=self.handle_habit_creation, padx=10, pady=8).pack(pady=10, fill="x", padx=50)
+
+        tk.Button(self.root, text="Back", font=self.font_normal, bg="#6C757D", fg="white", 
+                  command=self.create_welcome_screen, padx=10, pady=8).pack(pady=10, fill="x", padx=50)
+
+    def handle_habit_creation(self):
+        """Handle different habit frequencies."""
         name = self.habit_entry.get().strip()
-        frequency = self.frequency_entry.get().strip()
-        if name and frequency:
-            self.db.add_habit(name, frequency)
-            messagebox.showinfo("Success", f"Habit '{name}' added!")
-            self.habit_entry.delete(0, tk.END)
-            self.frequency_entry.delete(0, tk.END)
-        else:
-            messagebox.showwarning("Warning", "Please enter both habit name and frequency.")
+        frequency = self.frequency_var.get()
+
+        if not name:
+            messagebox.showwarning("Warning", "Please enter a habit name.")
+            return
+        
+        if frequency == "Daily":
+            self.db.add_habit(name, "Daily")
+            messagebox.showinfo("Success", f"Habit '{name}' created as a Daily habit!")
+            self.create_welcome_screen()
+        elif frequency == "Weekly":
+            self.select_weekly_schedule(name)
+        elif frequency == "Monthly":
+            self.select_monthly_schedule(name)
+
+    def select_weekly_schedule(self, name):
+        """Popup for selecting multiple days for a weekly habit."""
+        weekly_popup = tk.Toplevel(self.root)
+        weekly_popup.title("Select Weekly Schedule")
+        weekly_popup.geometry("300x350")
+
+        tk.Label(weekly_popup, text="Select Days:", font=self.font_title).pack(pady=10)
+
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        selected_days = {}
+
+        for day in days:
+            var = tk.IntVar()
+            chk = tk.Checkbutton(weekly_popup, text=day, font=self.font_normal, variable=var)
+            chk.pack(anchor="w", padx=20)
+            selected_days[day] = var
+
+        def confirm_weekly():
+            """Save the selected days."""
+            chosen_days = [day for day, var in selected_days.items() if var.get() == 1]
+            if not chosen_days:
+                messagebox.showwarning("Warning", "Please select at least one day.")
+                return
+
+            self.db.add_habit(name, f"Weekly: {', '.join(chosen_days)}")
+            messagebox.showinfo("Success", f"Habit '{name}' scheduled for {', '.join(chosen_days)}.")
+            weekly_popup.destroy()
+            self.create_welcome_screen()
+
+        tk.Button(weekly_popup, text="Confirm", font=self.font_normal, bg="#28A745", fg="white",
+                  command=confirm_weekly).pack(pady=10)
+
+    def select_monthly_schedule(self, name):
+        """Popup for selecting a specific day of the month."""
+        monthly_popup = tk.Toplevel(self.root)
+        monthly_popup.title("Select Monthly Schedule")
+        monthly_popup.geometry("300x200")
+
+        tk.Label(monthly_popup, text="Select a Date:", font=self.font_title).pack(pady=10)
+
+        self.date_var = tk.StringVar()
+        self.date_var.set("1")  # Default value
+        tk.OptionMenu(monthly_popup, self.date_var, *[str(i) for i in range(1, 32)]).pack(pady=5)
+
+        def confirm_monthly():
+            """Save the selected date."""
+            date_selected = self.date_var.get()
+            self.db.add_habit(name, f"Monthly: {date_selected}")
+            messagebox.showinfo("Success", f"Habit '{name}' scheduled for day {date_selected} of each month.")
+            monthly_popup.destroy()
+            self.create_welcome_screen()
+
+        tk.Button(monthly_popup, text="Confirm", font=self.font_normal, bg="#28A745", fg="white",
+                  command=confirm_monthly).pack(pady=10)
 
     def show_habits(self):
-        """Display all active habits."""
-        habits = self.db.get_active_habits()
-        habit_list = "\n".join([f"ID: {habit[0]} - {habit[1]} ({habit[2]})" for habit in habits])
-        messagebox.showinfo("Tracked Habits", habit_list if habit_list else "No active habits found.")
-
-    def mark_habit_complete(self):
-        """Mark a habit as completed and update streaks."""
-        habit_id = self.habit_entry.get().strip()
-        if habit_id.isdigit():
-            habit_id = int(habit_id)
-            self.db.check_habit(habit_id)
-            messagebox.showinfo("Success", f"Habit {habit_id} marked as completed!")
-
-            # Refresh the habit list after marking complete
-            self.show_habits()
-        else:
-            messagebox.showwarning("Warning", "Please enter a valid habit ID.")
-
-    def show_statistics(self):
-        """Show analytics and statistics for habits."""
+        """Display all stored habits in a message box."""
         habits = self.db.get_habits()
-        stats = "\n".join([f"ID: {habit[0]} - {habit[1]} | Streak: {self.db.get_streak(habit[0])} days" for habit in habits])
-        messagebox.showinfo("Habit Statistics", stats if stats else "No habits found.")
+        habit_list = "\n".join([f"ID: {habit[0]} - {habit[1]} ({habit[2]})" for habit in habits])
+        messagebox.showinfo("Tracked Habits", habit_list if habit_list else "No habits found.")
 
 # Run the GUI
 if __name__ == "__main__":

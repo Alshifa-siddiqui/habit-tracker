@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from collections import Counter
 from database import HabitDatabase
 
+
 class HabitAnalytics:
     def __init__(self):
         """Initialize database connection."""

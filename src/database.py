@@ -7,6 +7,13 @@ class HabitDatabase:
         self.conn = sqlite3.connect("habits.db")
         self.cursor = self.conn.cursor()
         self.create_tables()
+    
+    def delete_habit(self, habit_id):
+        """Delete a habit from the database along with its check-in history."""
+        self.cursor.execute("DELETE FROM check_ins WHERE habit_id = ?", (habit_id,))
+        self.cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+        self.conn.commit()
+
 
     def create_tables(self):
         """Create tables for habits and check-ins."""

@@ -1,5 +1,3 @@
-import sys
-import os
 import tkinter as tk
 from tkinter import messagebox
 import matplotlib.pyplot as plt
@@ -9,7 +7,6 @@ from analytics import HabitAnalytics
 
 class HabitTrackerGUI:
     def __init__(self, root):
-        """Initialize the GUI and connect to the database."""
         self.root = root
         self.root.title("Habit Tracker")
         self.root.geometry("400x550")

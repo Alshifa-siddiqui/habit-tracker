@@ -1,11 +1,17 @@
-import unittest
-from src.habit import Habit
+import pytest
+from habit import Habit
+from datetime import datetime, timezone
+import pytest  # Add this line at the very top
+from habit import Habit
 
-class TestHabit(unittest.TestCase):
-    def test_create_habit(self):
-        habit = Habit(name="Exercise", frequency="Daily")
-        self.assertEqual(habit.name, "Exercise")
-        self.assertEqual(habit.frequency, "Daily")
+def test_habit_initialization():
+    habit = Habit("Test", "daily")
+    assert habit.task == "Test"
+    assert isinstance(habit.creation_date, datetime)
+    assert habit.creation_date.tzinfo == timezone.utc
 
-if __name__ == "__main__":
-    unittest.main()
+def test_habit_completion():
+    habit = Habit("Test", "weekly")
+    completion_time = habit.complete()
+    assert isinstance(completion_time, datetime)
+    assert completion_time.tzinfo == timezone.utc

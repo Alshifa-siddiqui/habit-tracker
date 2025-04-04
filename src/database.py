@@ -1,61 +1,53 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
+from contextlib import contextmanager
 
-class HabitDatabase:
-    def __init__(self):
-        self.conn = sqlite3.connect("habits.db")
-        self.cursor = self.conn.cursor()
-        self.create_table()
+@contextmanager
+def get_db():
+    conn = sqlite3.connect('habits.db')
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
 
-    def create_table(self):
-        self.cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS habits (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE,
-                frequency TEXT,
-                day_of_week TEXT DEFAULT NULL,
-                date_of_month TEXT DEFAULT NULL,
-                completed_count INTEGER DEFAULT 0,
-                longest_streak INTEGER DEFAULT 0,
-                current_streak INTEGER DEFAULT 0,
-                last_completed DATE DEFAULT NULL,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-            """
-        )
-        self.conn.commit()
+def initialize_db():
+    with get_db() as conn:
+        conn.execute('''CREATE TABLE IF NOT EXISTS habits (
+            id INTEGER PRIMARY KEY,
+            task TEXT UNIQUE,
+            periodicity TEXT CHECK(periodicity IN ('daily', 'weekly')),
+            creation_date TEXT
+        )''')
+        conn.execute('''CREATE TABLE IF NOT EXISTS completions (
+            habit_id INTEGER,
+            completion_date TEXT,
+            FOREIGN KEY(habit_id) REFERENCES habits(id)
+        )''')
 
-    def add_habit(self, name, frequency, days=None, dates=None):
-        try:
-            self.cursor.execute(
-                "INSERT INTO habits (name, frequency, day_of_week, date_of_month) VALUES (?, ?, ?, ?)",
-                (name, frequency, days, dates)
-            )
-            self.conn.commit()
-        except sqlite3.IntegrityError:
-            raise Exception(f"Habit '{name}' already exists.")
+def create_habit(conn, task: str, periodicity: str):
+    # Check for duplicates
+    cur = conn.execute("SELECT id FROM habits WHERE task = ?", (task,))
+    if cur.fetchone():
+        raise ValueError("Habit already exists!")
+    
+    if periodicity not in ['daily', 'weekly']:
+        raise ValueError("Invalid periodicity. Use 'daily' or 'weekly'")
+    
+    conn.execute(
+        "INSERT INTO habits (task, periodicity, creation_date) VALUES (?, ?, ?)",
+        (task, periodicity, datetime.now(timezone.utc).isoformat())
+    )
+    conn.commit()
 
-    def update_habit(self, old_name, new_name, new_frequency, days=None, dates=None):
-        self.cursor.execute(
-            "UPDATE habits SET name=?, frequency=?, day_of_week=?, date_of_month=? WHERE name=?",
-            (new_name, new_frequency, days, dates, old_name)
-        )
-        self.conn.commit()
+def add_completion(conn, habit_id: int):
+    conn.execute(
+        "INSERT INTO completions (habit_id, completion_date) VALUES (?, ?)",
+        (habit_id, datetime.now(timezone.utc).isoformat())
+    )
+    conn.commit()
 
-    def delete_habit(self, name):
-        self.cursor.execute("DELETE FROM habits WHERE name=?", (name,))
-        self.conn.commit()
-
-    def get_habits(self):
-        self.cursor.execute("SELECT * FROM habits")
-        columns = [col[0] for col in self.cursor.description]
-        return [dict(zip(columns, row)) for row in self.cursor.fetchall()]
-
-    def get_habit_details(self, name):
-        self.cursor.execute("SELECT * FROM habits WHERE name=?", (name,))
-        row = self.cursor.fetchone()
-        if not row:
-            return None
-        columns = [col[0] for col in self.cursor.description]
-        return dict(zip(columns, row))
+def delete_habit(conn, habit_id: int):
+    conn.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+    conn.execute("DELETE FROM completions WHERE habit_id = ?", (habit_id,))
+    conn.commit()

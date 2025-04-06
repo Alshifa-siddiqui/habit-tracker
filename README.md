@@ -1,172 +1,98 @@
-# 📝 **Habit Tracker**  
-_A powerful habit-tracking app with analytics and progress tracking._
+# 🌒 Habit Tracker CLI — Rule Your Routines from the Terminal
 
-## 📌 **Introduction**
-This project is part of the **"Object-Oriented and Functional Programming with Python"** university course. The **Habit Tracker** allows users to **create, manage, and track their habits** through both a **CLI and GUI interface** while providing **habit analytics** such as streaks, progress visualization, and completion reports.
-
-### **✨ Key Features**
-✅ **Track Daily/Weekly/Monthly Habits**  
-✅ **View Habit Streaks & Progress Reports**  
-✅ **Mark Habits as Completed**  
-✅ **Generate Analytics & Charts**  
-✅ **Interactive GUI (Tkinter)**  
-✅ **SQLite Database for Data Persistence**  
-✅ **Unit Testing with Pytest**  
+> “Discipline is choosing between what you want *now* and what you want *most*.”  
+> Welcome to your command-line sanctuary of self-mastery.
 
 ---
 
-## 🏗 **Project Structure**
-```sh
-habit-tracker/
-├── src/
-│   ├── app.py                # Main script for running the application
-│   ├── database.py           # Handles SQLite database interactions
-│   ├── habit.py              # Defines the Habit class and its methods
-│   ├── analytics.py          # Functional programming logic for habit analysis
-│   ├── gui.py                # Manages the Tkinter-based UI
-│
-├── tests/
-│   ├── test_habit.py         # Unit tests for the Habit class
-│   ├── test_database.py      # Tests for database queries
-│
-├── docs/                     # Documentation and diagrams
-│   ├── user_flowchart.png     # User interaction flowchart
-│   ├── component_diagram.png  # Module interaction diagram
-│
-├── config.json               # Stores configuration settings
-├── setup.py                  # Helps with packaging and installation
-├── requirements.txt          # Dependencies
-├── LICENSE                   # License file
-├── .gitignore                # Git ignore file
-└── README.md                 # Project description
-```
+## 🧩 What Is This?
+
+**Habit Tracker CLI** is your digital spellbook for building better habits — created entirely in Python using **Object-Oriented Programming** (OOP) and a dash of **functional magic** ✨.
+
+From tracking daily rituals to analyzing weekly progress, everything is at your fingertips — no mouse, no GUI, just pure, minimalist power.
 
 ---
 
-## 🚀 **Installation & Setup**
-### **1️⃣ Clone the Repository**
-Ensure **Git** is installed, then run:
-```sh
+## ✨ Why Use It?
+
+- 👑 Because GUIs are overrated.
+- 🧠 Because discipline should be **data-driven**.
+- 🔮 Because it was crafted with code, caffeine, and chaos.
+
+This app was developed as part of the IU portfolio assignment for **Object-Oriented and Functional Programming** — but designed like a product worth publishing.
+
+---
+
+## 🚀 Features at a Glance
+
+| ⚔️ Feature             | 💬 Description |
+|------------------------|----------------|
+| 🛠️ Create Habits       | Daily or weekly |
+| 📝 Edit/Delete Habits  | Refine or remove |
+| 📆 Check-In Logging    | Record completion dates |
+| 📊 Analytics           | Functional programming magic to analyze streaks |
+| 💾 Persistent Storage  | Data saved in SQLite automatically |
+| 🧪 Unit Tested         | Includes unit tests for reliability |
+
+---
+
+## 🛠️ Tech Behind the Magic
+
+- **Python 3.x**
+- **SQLite** (`sqlite3`)
+- **Functional Programming**: Analytics logic
+- **Object-Oriented Design**: Habit + HabitDB classes
+- **Unittest** for testing modules
+
+---
+
+## 🧙 How to Summon the Tracker (Installation)
+
+First, clone the repository:
+
+```bash
 git clone https://github.com/Alshifa-siddiqui/habit-tracker.git
 cd habit-tracker
-```
 
-### **2️⃣ Create a Virtual Environment**
-To prevent dependency conflicts, create and activate a virtual environment.
-
-#### **Windows**
-```sh
-python -m venv venv
-venv\Scripts\activate
-```
-#### **MacOS/Linux**
-```sh
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### **3️⃣ Install Dependencies**
-```sh
+Then install dependencies
 pip install -r requirements.txt
-```
 
----
+🧰 How to Use It
+👉 From the root of the project:
+python src/CLI.py
 
-## 🎯 **Usage**
-### **1️⃣ Run the Application**
-```sh
-python src/app.py
-```
 
-### **2️⃣ CLI Menu Options**
-| Command              | Description |
-|----------------------|-------------|
-| `1` Add Habit       | Create a new habit |
-| `2` Show Habits    | List all habits |
-| `3` Mark Complete | Mark a habit as completed |
-| `4` Show Analytics | View streaks & reports |
-| `5` Launch GUI    | Open GUI for tracking |
-| `6` Exit           | Close the application |
+You’ll be guided via text-based prompts to:
 
-### **3️⃣ Running the GUI**
-```sh
-python src/gui.py
-```
-**GUI Features**:
-✔ **Add New Habits**  
-✔ **Select Habit Frequency (Daily/Weekly/Monthly)**  
-✔ **Mark Habits as Completed**  
-✔ **View Analytics & Statistics**  
+Add a new habit
 
----
+Log a check-in
 
-## 📊 **Diagrams & Visuals**
-### **1️⃣ User Flowchart**
-```mermaid
-flowchart TD;
-    A[Start Habit Tracker GUI] --> B[Display Main Menu];
-    B -->|Add Habit| C[Enter Habit Details];
-    B -->|Mark Habit Complete| D[Select Habit & Confirm];
-    B -->|Show Analytics| E[Generate Reports & Charts];
-    B -->|Exit| F[End Session];
-```
+View your current habits
 
-### **2️⃣ Component Diagram**
-```mermaid
-graph TD
-    A[app.py] -->|Uses| B[database.py]
-    A -->|Imports| C[habit.py]
-    A -->|Calls| D[analytics.py]
-    A -->|Launches| E[gui.py]
-    
-    B -->|Reads & Writes| F[habits.db]
-    D -->|Generates Insights| G[Statistics]
-    
-    A -->|Runs Tests| H[tests/test_habit.py]
-    A -->|Runs Tests| I[tests/test_database.py]
-```
+Analyze performance via terminal dashboards
 
----
+🔍 Folder Spellbook
+habit-tracker/
+├── src/
+│   ├── CLI.py                  # Main command-line interface
+│   ├── HabitDB.py              # SQLite + Habit logic
+│   ├── habit.py                # Habit class (OOP)
+│   ├── analytics.py            # Functional performance analysis
+│   ├── dates_persistance.py    # Save/load habit check-in dates
+│   └── __init__.py
+├── tests/
+│   ├── test_habitdb.py
+│   ├── test_analytics.py
+│   └── ...
+├── README.md
+├── requirements.txt
+├── setup.py
+├── habits.db                   # Auto-generated database
 
-## ✅ **Testing**
-This project includes **unit tests** for validating functionality.
+🧪 Running the Tests
+Because we don’t trust code without tests, do:
+cd tests
+python -m unittest discover
 
-### **1️⃣ Run All Tests**
-```sh
-pytest
-```
-
-### **2️⃣ Test Coverage**
-✔ Habit Creation  
-✔ Habit Completion Tracking  
-✔ Database Connectivity  
-✔ Analytics & Streak Calculation  
-
----
-
-## 🛠 **Technologies Used**
-- **Python 3.12**
-- **SQLite** (Database)
-- **Tkinter** (GUI)
-- **Matplotlib** (Charts)
-- **Pytest** (Testing)
-- **Datetime** (Time Operations)
-
----
-
-## 🏁 **Future Improvements**
-🔹 **Add Notifications/Reminders**  
-🔹 **Mobile App Version** (Possibly in Flutter)  
-🔹 **Dark Mode for UI**  
-🔹 **Cloud Syncing** for Multi-Device Use  
-
----
-
-## 📜 **License**
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file.
-
----
-
-## 📧 **Contact**
-For any queries, contact:  
-📩 **siddiqui21shifa@gmail.com**  
+You’ll see output confirming all habit/database/analytics modules are functioning properly.

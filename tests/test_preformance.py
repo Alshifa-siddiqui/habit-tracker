@@ -1,10 +1,11 @@
-from datetime import  datetime, timedelta
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from datetime import datetime, timedelta
 import pytest
-from habitDB import HabitDB
 from habit import Habit
+from habitDB import HabitDB
 from Dates_Persistence import save_dates, delete_dates
-
-
 
 class TestPerformance:
     """ in this test I want to test if the Solution can handel large data not testing the speed of the execution

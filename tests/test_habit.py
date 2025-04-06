@@ -1,10 +1,11 @@
-from datetime import  datetime
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from datetime import datetime
 import pytest
-from habitDB import HabitDB
 from habit import Habit
+from habitDB import HabitDB
 from Dates_Persistence import save_dates, load_dates, delete_dates
-
-
 
 class TestHabit:
     """testing Habit class

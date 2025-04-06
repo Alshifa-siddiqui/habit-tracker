@@ -1,9 +1,18 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from datetime import datetime
+import pytest
 from habit import Habit
 from habitDB import HabitDB
-import pytest
-from analysis import get_most_consistent_habits, get_most_struggled_habits, get_daily_habits, get_weekly_habits , calculate_completion_rate
-from Dates_Persistence import  save_dates , delete_dates
+from analysis import (
+    get_most_consistent_habits,
+    get_most_struggled_habits,
+    get_daily_habits,
+    get_weekly_habits,
+    calculate_completion_rate,
+)
+from Dates_Persistence import save_dates, delete_dates
 
 class TestAnalysis:
     """ in this class we will test the analysis file

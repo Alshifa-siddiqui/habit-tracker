@@ -113,6 +113,14 @@ pip install -r requirements.txt
 💀 Full test coverage.  
 
 ```bash
+
+### 🌱 Load Sample Habits (Optional but Recommended)
+
+To quickly test analytics and reports with pre-filled data, run:
+
+```bash
+python src/seed_habits.py
+
 # Run all tests
 pytest tests/
 ```

@@ -160,7 +160,7 @@ class HabitDB:
             duration = self.get_duration(name)
             if curr_streak < duration:
                 cursor.execute("UPDATE habits SET streak = ? WHERE name = ?", (curr_streak, name))
-            elif curr_streak == duration:
+            elif curr_streak >= duration:
                 cursor.execute("UPDATE habits SET status = 'completed', streak = ? WHERE name = ?", (duration, name))
             if broken_count > self.get_broken_count(name):
                 cursor.execute("UPDATE habits SET streak = 0, broken_count = ? WHERE name = ?", (broken_count, name))

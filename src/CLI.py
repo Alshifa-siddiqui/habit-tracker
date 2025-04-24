@@ -107,7 +107,7 @@ class CLI:
             elif choice == "14":
                 name = input("Enter the name of the habit to update its description: ").strip()
                 new_desc = input("Enter the new description: ").strip()
-                self.db.update_description( new_desc, name)
+                self.db.update_description( name, new_desc)
                 print(f"Successfully updated the description for '{name}'.")
 
             elif choice == "15":

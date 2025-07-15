@@ -4,11 +4,8 @@ from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'habits.db')
 
-
 def connect_db():
-    conn = sqlite3.connect(DB_PATH)
-    return conn
-
+    return sqlite3.connect(DB_PATH)
 
 def create_table():
     conn = connect_db()
@@ -26,7 +23,6 @@ def create_table():
     conn.commit()
     conn.close()
 
-
 def complete_habit(name):
     conn = connect_db()
     c = conn.cursor()
@@ -34,17 +30,12 @@ def complete_habit(name):
     row = c.fetchone()
     if row:
         new_streak = row[0] + 1
-        c.execute('''
-            UPDATE habits 
-            SET last_completed = ?, streak = ? 
-            WHERE name = ?
-        ''', (datetime.now(), new_streak, name))
+        c.execute('UPDATE habits SET last_completed = ?, streak = ? WHERE name = ?', (datetime.now(), new_streak, name))
         conn.commit()
         print(f"Habit '{name}' marked as completed. Current streak: {new_streak}")
     else:
         print("Habit not found.")
     conn.close()
-
 
 def delete_habit(name):
     conn = connect_db()

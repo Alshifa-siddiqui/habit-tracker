@@ -3,7 +3,6 @@ import os
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'habits.db')
 
-
 def get_all_habits():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -12,7 +11,6 @@ def get_all_habits():
     conn.close()
     return results
 
-
 def get_habits_by_periodicity(periodicity):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -20,7 +18,6 @@ def get_habits_by_periodicity(periodicity):
     results = c.fetchall()
     conn.close()
     return results
-
 
 def get_longest_streak():
     conn = sqlite3.connect(DB_PATH)

@@ -2,11 +2,9 @@ import click
 from src.db import connect_db, create_table, complete_habit, delete_habit
 from src.analytics import get_all_habits, get_habits_by_periodicity, get_longest_streak
 
-
 @click.group()
 def cli():
     pass
-
 
 @cli.command()
 @click.argument('name')
@@ -19,26 +17,22 @@ def add(name, periodicity):
     click.echo(f"Habit '{name}' with '{periodicity}' periodicity added.")
     conn.close()
 
-
 @cli.command()
 def show():
     habits = get_all_habits()
     for habit in habits:
         click.echo(f"Habit: {habit[0]}, Periodicity: {habit[1]}, Streak: {habit[2]}")
 
-
 @cli.command()
 @click.argument('name')
 def complete(name):
     complete_habit(name)
-
 
 @cli.command()
 @click.argument('name')
 def delete(name):
     delete_habit(name)
     click.echo(f"Habit '{name}' deleted.")
-
 
 @cli.command()
 @click.argument('periodicity')
@@ -49,7 +43,6 @@ def show_by_period(periodicity):
             click.echo(f"Habit: {habit[0]}")
     else:
         click.echo(f"No habits found for periodicity '{periodicity}'.")
-
 
 @cli.command()
 def longest_streak():

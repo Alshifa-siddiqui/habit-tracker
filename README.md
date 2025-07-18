@@ -1,93 +1,87 @@
-# 📋 IU Habit Tracker App
+📋 IU Habit Tracker App
+A command-line Python application to help users track daily and weekly habits, analyze streaks, and stay consistent.
+Built using Object-Oriented and Functional Programming with SQLite for persistence.
 
-A command-line Python application to help users track daily and weekly habits, analyze streaks, and stay consistent.  
-Developed using Object-Oriented and Functional Programming principles with SQLite for persistence.
+📑 Table of Contents
+1️⃣ About the Project
+2️⃣ Technologies Used
+3️⃣ Project Structure
+4️⃣ How to Run
+5️⃣ Features
+6️⃣ UML Class Diagram
+7️⃣ Example Usage
+8️⃣ License
 
-## 📑 Table of Contents
-1. About the Project  
-2. Technologies Used  
-3. Project Structure  
-4. How to Run  
-5. Features  
-6. UML Class Diagram  
-7. Example Usage  
-8. License  
+📌 About the Project
+This CLI-based Habit Tracker allows users to:
+✔️ Create, update, and delete daily and weekly habits
+✔️ Track progress with completion streaks
+✔️ Analyze habits through periodicity filters and reports
+✔️ Store all data persistently using SQLite
 
-## 📌 About the Project
-This CLI-based Habit Tracker allows users to:  
-- Create, update, and delete daily and weekly habits.  
-- Track progress with completion streaks.  
-- Analyze habits through periodicity filters and reports.  
-- Store all data persistently using SQLite.  
+🛠️ Technologies Used
+Python 3.11
 
-## 🛠️ Technologies Used
-- **Python 3.11**  
-- **SQLite** for data storage  
-- **Click** for CLI interaction  
-- **Pytest** for unit testing  
+SQLite (Database)
 
-## 📂 Project Structure
-habit-tracker/
-├── data/
-├── src/
-│ ├── analytics.py
-│ ├── cli.py
-│ ├── db.py
-│ ├── habit.py
-├── tests/
-│ ├── test_habit.py
-├── main.py
-├── README.md
-├── requirements.txt
+Click (CLI interaction)
 
-- `src/`: Core application logic (habit management, CLI, analytics, database)  
-- `tests/`: Unit tests using Pytest  
-- `main.py`: Entry point  
-- `requirements.txt`: Project dependencies  
+Pytest (Unit testing)
 
-## 🚀 How to Run
-1️⃣ Clone the repo:  
-```bash
-git clone https://github.com/Alshifa-siddiqui/habit-tracker.git
-cd habit-tracker
+📂 Project Structure
+habit-tracker/  
+├── data/  
+├── src/  
+│   ├── analytics.py  
+│   ├── cli.py  
+│   ├── db.py  
+│   ├── habit.py  
+├── tests/  
+│   ├── test_habit.py  
+├── main.py  
+├── README.md  
+├── requirements.txt  
 
-2️⃣ Create and activate virtual environment:
-python -m venv venv
-venv\Scripts\activate    # Windows
-source venv/bin/activate # Mac/Linux
+src/: Core app logic (habit management, CLI, analytics, DB)
 
-3️⃣ Install dependencies:
-pip install -r requirements.txt
+tests/: Unit tests via Pytest
 
-4️⃣ Run the app:python main.py
+main.py: Entry point
 
-💡 Example CLI Commands:
-python main.py add Workout Daily
-python main.py complete Workout
-python main.py show
-python main.py longest-streak
+requirements.txt: Dependencies
+
+🚀 How to Run
+Step 1: Clone repo
+git clone https://github.com/Alshifa-siddiqui/habit-tracker.git  
+cd habit-tracker  
+
+Step 2: Create & activate virtual environment
+python -m venv venv  
+venv\Scripts\activate    # Windows  
+source venv/bin/activate # Mac/Linux  
+
+Step 3: Install dependencies
+pip install -r requirements.txt  
+
+Step 4: Run the app
+python main.py  
+
+💡 Example CLI Commands
+python main.py add Workout Daily  
+python main.py complete Workout  
+python main.py show  
+python main.py longest-streak  
 
 ✨ Features
-Track daily/weekly habits
-
-Analyze longest streaks
-
-Periodicity filtering
-
-SQLite persistent storage
-
-CLI interaction via Click
-
-Unit tests with Pytest
+✔️ Track daily/weekly habits
+✔️ Analyze longest streaks
+✔️ Filter by periodicity
+✔️ Persistent SQLite storage
+✔️ CLI with Click
+✔️ Unit tests with Pytest
 
 📝 UML Class Diagram
-![UML Diagram](./assets/uml.png)
+![UML DIAGRAM](UML.png)
 
 📸 Example CLI Output
-### Main Menu
-![Main Menu](assets/cli/CODE.png)
-
-### Example Output
-
-📄 License
-MIT License
+![CLI OUTPUT](CODE.png)

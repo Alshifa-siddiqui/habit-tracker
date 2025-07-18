@@ -35,6 +35,7 @@ This CLI-based Habit Tracker allows users to:
 ---
 
 ## 📂 Project Structure  
+``` 
 habit-tracker/
 ├── data/
 ├── src/
@@ -47,6 +48,7 @@ habit-tracker/
 ├── main.py
 ├── README.md
 ├── requirements.txt
+``` 
 
 - `src/`: Core app logic (habit management, CLI, analytics, DB)  
 - `tests/`: Unit tests via Pytest  
@@ -87,17 +89,31 @@ python main.py complete Workout
 python main.py show  
 python main.py longest-streak  
 ```
-
+---
 ✨ Features
+---
 ✔️ Track daily/weekly habits
+
 ✔️ Analyze longest streaks
+
 ✔️ Filter by periodicity
+
 ✔️ Persistent SQLite storage
+
 ✔️ CLI with Click
+
 ✔️ Unit tests with Pytest
 
-📝 UML Class Diagram
-![UML Diagram](UML-1.png)
+---
+### 📝 UML Class Diagram
+---
 
+![UML Diagram](UML-Pic-1.png)
+
+---
 📸 Example CLI Output
+---
 ![CLI Output](CODE-1.png)
+
+## 📄 License
+#### MIT License

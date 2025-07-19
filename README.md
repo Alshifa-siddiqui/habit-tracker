@@ -105,6 +105,12 @@ python main.py longest-streak
 ✔️ Unit tests with Pytest
 
 ---
+## 🧪 Predefined Sample Data
+The database includes:
+- Daily Habit: "Drink Water" (30 consecutive days)
+- Weekly Habit: "Gym" (4 consecutive weeks)
+
+---
 ### 📝 UML Class Diagram
 ---
 

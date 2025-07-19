@@ -1,0 +1,4 @@
+[
+  "tests/test_habit.py::test_complete_and_delete_habit",
+  "tests/test_habit.py::test_create_habit"
+]

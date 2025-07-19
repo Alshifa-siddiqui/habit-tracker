@@ -90,6 +90,13 @@ python main.py show
 python main.py longest-streak  
 ```
 ---
+## ✅ Running Tests
+To run the test suite using pytest:
+```bash
+pytest
+
+---
+
 ✨ Features
 ---
 ✔️ Track daily/weekly habits
@@ -120,6 +127,16 @@ The database includes:
 📸 Example CLI Output
 ---
 ![CLI Output](CODE-1.png)
+
+---
+## 🧪 Predefined Sample Data
+For testing purposes, the database includes:
+- **Daily Habit:** "Drink Water" (30 consecutive days)
+- **Weekly Habit:** "Gym" (4 consecutive weeks)
+- **Daily Habit:** "Morning Walk" (20 consecutive days)
+- **Weekly Habit:** "Yoga" (5 consecutive weeks)
+- **Daily Habit:** "Journal Writing" (25 consecutive days)
+---
 
 ## 📄 License
 #### MIT License

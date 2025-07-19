@@ -90,11 +90,12 @@ python main.py show
 python main.py longest-streak  
 ```
 ---
+
 ## ✅ Running Tests
 To run the test suite using pytest:
 ```bash
 pytest
-
+```
 ---
 
 ✨ Features
@@ -113,10 +114,11 @@ pytest
 
 ---
 ## 🧪 Predefined Sample Data
+```bash
 The database includes:
 - Daily Habit: "Drink Water" (30 consecutive days)
 - Weekly Habit: "Gym" (4 consecutive weeks)
-
+```
 ---
 ### 📝 UML Class Diagram
 ---

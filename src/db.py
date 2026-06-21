@@ -30,7 +30,9 @@ def complete_habit(name):
     row = c.fetchone()
     if row:
         new_streak = row[0] + 1
-        c.execute('UPDATE habits SET last_completed = ?, streak = ? WHERE name = ?', (datetime.now(), new_streak, name))
+        # Store an ISO-8601 string; passing a datetime object triggers a
+        # DeprecationWarning (default adapter removed in Python 3.12+).
+        c.execute('UPDATE habits SET last_completed = ?, streak = ? WHERE name = ?', (datetime.now().isoformat(" "), new_streak, name))
         conn.commit()
         print(f"Habit '{name}' marked as completed. Current streak: {new_streak}")
     else:

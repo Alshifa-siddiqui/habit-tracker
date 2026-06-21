@@ -4,7 +4,10 @@ from src.analytics import get_all_habits, get_habits_by_periodicity, get_longest
 
 @click.group()
 def cli():
-    pass
+    # Ensure the habits table exists before any command runs. Without this a
+    # fresh database (no committed data/habits.db) raised
+    # "OperationalError: no such table: habits" on the first command.
+    create_table()
 
 @cli.command()
 @click.argument('name')

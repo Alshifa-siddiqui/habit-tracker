@@ -1,144 +1,148 @@
-# 📋 IU Habit Tracker App  
+# 📋 Habit Tracker (CLI)
 
-A **command-line Python application** to help users track daily and weekly habits, analyze streaks, and stay consistent.  
-Built using **Object-Oriented and Functional Programming** with **SQLite** for persistence.
-
----
-
-## 📑 Table of Contents  
-1️⃣ About the Project  
-2️⃣ Technologies Used  
-3️⃣ Project Structure  
-4️⃣ How to Run  
-5️⃣ Features  
-6️⃣ UML Class Diagram  
-7️⃣ Example Usage  
-8️⃣ License  
+A **command-line Python application** to track daily and weekly habits, record
+completions, and analyze streaks. Built with an OOP + functional style and
+**SQLite** for persistence.
 
 ---
 
-## 📌 About the Project  
-This CLI-based Habit Tracker allows users to:  
-- ✔️ Create, update, and delete daily and weekly habits  
-- ✔️ Track progress with completion streaks  
-- ✔️ Analyze habits through periodicity filters and reports  
-- ✔️ Store all data persistently using SQLite  
+## 📑 Table of Contents
+1. [About](#-about)
+2. [Tech Stack](#-tech-stack)
+3. [Project Structure](#-project-structure)
+4. [Installation](#-installation)
+5. [Usage](#-usage)
+6. [Features](#-features)
+7. [Testing](#-testing)
+8. [Predefined Sample Data](#-predefined-sample-data)
+9. [Diagrams & Screenshots](#-diagrams--screenshots)
+10. [Known Limitations](#-known-limitations)
+11. [License](#-license)
 
 ---
 
-## 🛠️ Technologies Used  
-- **Python 3.11**  
-- **SQLite** (Database)  
-- **Click** (CLI interaction)  
-- **Pytest** (Unit testing)  
+## 📌 About
+This CLI Habit Tracker lets you:
+- Create and delete daily/weekly habits
+- Mark habits complete (incrementing a completion count)
+- List habits and filter by periodicity
+- Find the habit with the longest streak
+- Persist everything in a local SQLite database
 
 ---
 
-## 📂 Project Structure  
-``` 
+## 🛠️ Tech Stack
+- **Python 3.10+**
+- **SQLite** (standard-library `sqlite3`)
+- **Click** (CLI framework)
+- **Pytest** (tests)
+
+---
+
+## 📂 Project Structure
+```
 habit-tracker/
 ├── data/
+│   └── habits.db            # shipped SQLite DB with sample data
 ├── src/
-│ ├── analytics.py
-│ ├── cli.py
-│ ├── db.py
-│ ├── habit.py
+│   ├── __init__.py
+│   ├── analytics.py         # read/report queries
+│   ├── cli.py               # Click commands (ensures schema on startup)
+│   ├── db.py                # connection + schema + writes
+│   └── habit.py             # Habit class
 ├── tests/
-│ ├── test_habit.py
-├── main.py
-├── README.md
+│   └── test_habit.py        # pytest suite (isolated temp DBs)
+├── assets/
+│   ├── UML.png
+│   └── CLI/CODE.png
+├── .github/workflows/ci.yml # CI: install + tests
+├── main.py                  # entry point
 ├── requirements.txt
-``` 
-
-- `src/`: Core app logic (habit management, CLI, analytics, DB)  
-- `tests/`: Unit tests via Pytest  
-- `main.py`: Entry point  
-- `requirements.txt`: Dependencies  
+├── .gitignore
+├── LICENSE
+└── README.md
+```
 
 ---
 
-## 🚀 How to Run  
-
-### Step 1: Clone repo  
+## 🚀 Installation
 ```bash
-git clone https://github.com/Alshifa-siddiqui/habit-tracker.git  
+git clone https://github.com/Alshifa-siddiqui/habit-tracker.git
 cd habit-tracker
-``` 
-
-### Step 2: Create & activate virtual environment
-```bash
-python -m venv venv  
-venv\Scripts\activate    # Windows  
-source venv/bin/activate # Mac/Linux  
+python -m venv venv
+# Windows: venv\Scripts\activate     |  macOS/Linux: source venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### Step 3: Install dependencies
-```bash
-pip install -r requirements.txt  
-```
-
-### Step 4: Run the app
-```bash
-python main.py  
-```
-
-## 💡 Example CLI Commands
-```bash
-python main.py add Workout Daily  
-python main.py complete Workout  
-python main.py show  
-python main.py longest-streak  
-```
 ---
 
-## ✅ Running Tests
-To run the test suite using pytest:
+## 💡 Usage
+```bash
+python main.py add "Workout" Daily       # add a habit
+python main.py complete "Workout"        # mark it complete (+1 streak)
+python main.py show                       # list all habits
+python main.py show-by-period Daily       # filter by periodicity
+python main.py longest-streak             # habit with the highest streak
+python main.py delete "Workout"           # remove a habit
+```
+The schema is created automatically on first run, so the app works even if
+`data/habits.db` is deleted.
+
+---
+
+## ✨ Features
+- Add / complete / delete daily & weekly habits
+- List habits and filter by periodicity
+- Longest-streak report
+- Persistent SQLite storage (auto-created schema)
+- Click-based CLI
+- Pytest test suite + GitHub Actions CI
+
+---
+
+## 🧪 Testing
 ```bash
 pytest
 ```
----
-
-✨ Features
----
-✔️ Track daily/weekly habits
-
-✔️ Analyze longest streaks
-
-✔️ Filter by periodicity
-
-✔️ Persistent SQLite storage
-
-✔️ CLI with Click
-
-✔️ Unit tests with Pytest
+Tests run against isolated temporary databases (they do not touch the shipped
+`data/habits.db`).
 
 ---
-## 🧪 Predefined Sample Data
-```bash
-The database includes:
-- Daily Habit: "Drink Water" (30 consecutive days)
-- Weekly Habit: "Gym" (4 consecutive weeks)
-```
----
-### 📝 UML Class Diagram
----
 
-![UML Diagram](UML-Pic-1.png)
+## 📦 Predefined Sample Data
+The shipped `data/habits.db` contains:
 
----
-📸 Example CLI Output
----
-![CLI Output](CODE-1.png)
+| Habit | Periodicity | Streak |
+|---|---|---|
+| Drink Water | Daily | 30 |
+| Gym | Weekly | 4 |
+| Morning Walk | Daily | 20 |
+| Yoga | Weekly | 5 |
+| Journal Writing | Daily | 25 |
 
 ---
-## 🧪 Predefined Sample Data
-For testing purposes, the database includes:
-- **Daily Habit:** "Drink Water" (30 consecutive days)
-- **Weekly Habit:** "Gym" (4 consecutive weeks)
-- **Daily Habit:** "Morning Walk" (20 consecutive days)
-- **Weekly Habit:** "Yoga" (5 consecutive weeks)
-- **Daily Habit:** "Journal Writing" (25 consecutive days)
+
+## 📝 Diagrams & Screenshots
+
+**UML Class Diagram**
+
+![UML Diagram](assets/UML.png)
+
+**Example CLI Output**
+
+![CLI Output](assets/CLI/CODE.png)
+
+---
+
+## ⚠️ Known Limitations
+- **Streak is a completion counter, not a date-based streak.** `complete`
+  increments `streak` by 1 on each call; it does not verify that completions
+  occur on consecutive days/weeks. A date-aware streak engine (using
+  `last_completed`) would be a natural enhancement.
+- The `Habit` class is currently a thin data holder; CLI commands use direct
+  SQL rather than the class.
+
 ---
 
 ## 📄 License
-#### MIT License
+Released under the [MIT License](LICENSE).

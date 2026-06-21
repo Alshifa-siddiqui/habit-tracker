@@ -8,6 +8,9 @@ def connect_db():
     return sqlite3.connect(DB_PATH)
 
 def create_table():
+    # Ensure the data/ directory exists before SQLite opens the file — the db is
+    # gitignored, so a fresh clone won't have it yet.
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = connect_db()
     c = conn.cursor()
     c.execute('''

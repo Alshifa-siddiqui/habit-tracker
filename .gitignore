@@ -9,6 +9,10 @@ venv/
 .venv/
 env/
 
+# local database (runtime artifact — seed it with: python -m src.seed)
+*.db
+data/*.db
+
 # OS junk
 .DS_Store
 Thumbs.db

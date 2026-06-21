@@ -42,14 +42,14 @@ This CLI Habit Tracker lets you:
 ## 📂 Project Structure
 ```
 habit-tracker/
-├── data/
-│   └── habits.db            # shipped SQLite DB with sample data
+├── data/                    # local SQLite db lives here (gitignored)
 ├── src/
 │   ├── __init__.py
 │   ├── analytics.py         # read/report queries
 │   ├── cli.py               # Click commands (ensures schema on startup)
 │   ├── db.py                # connection + schema + writes
-│   └── habit.py             # Habit class
+│   ├── habit.py             # Habit class
+│   └── seed.py              # load the sample habits (python -m src.seed)
 ├── tests/
 │   └── test_habit.py        # pytest suite (isolated temp DBs)
 ├── assets/
@@ -109,8 +109,15 @@ Tests run against isolated temporary databases (they do not touch the shipped
 
 ---
 
-## 📦 Predefined Sample Data
-The shipped `data/habits.db` contains:
+## 📦 Sample Data
+The database file is a runtime artifact and is **not** committed. Load the sample
+habits after cloning with:
+
+```bash
+python -m src.seed
+```
+
+This creates the schema (if needed) and inserts:
 
 | Habit | Periodicity | Streak |
 |---|---|---|

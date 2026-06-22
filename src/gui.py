@@ -636,10 +636,14 @@ class VitalisApp:
         except Exception as e: messagebox.showerror("Error",str(e),parent=self.root)
 
     def _use_freeze(self,habit):
-        if self.db.use_streak_freeze(habit["id"]): messagebox.showinfo("🧊","Streak protected!")
-        else:
-            if messagebox.askyesno("No Freezes","Add a freeze?",parent=self.root):
+        h=self.db.get_habit_by_id(habit["id"])
+        if h and h["streak_freeze"]<=0:
+            if messagebox.askyesno("No Freezes","You have no freezes. Add one?",parent=self.root):
                 self.db.add_streak_freeze(habit["id"]); messagebox.showinfo("Done","Freeze added! ✅")
+        elif self.db.use_streak_freeze(habit["id"]):
+            messagebox.showinfo("🧊","Missed day forgiven — streak protected!")
+        else:
+            messagebox.showinfo("🧊","Your streak isn't at risk right now.")
         self._refresh()
 
     def _archive(self,habit):

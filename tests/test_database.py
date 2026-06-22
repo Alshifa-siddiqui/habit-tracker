@@ -119,3 +119,39 @@ def test_longest_streak_tracks_best_run(db):
     hid = db.add_habit("Pushups", "daily")
     _seed_history(db, hid, [10, 9, 8, 5, 0])  # runs of length 3, 1, 1
     assert db.get_habit_by_id(hid)["longest_streak"] == 3
+
+
+def test_freeze_forgives_missed_day_and_revives_streak(db):
+    hid = db.add_habit("Run", "daily")
+    _seed_history(db, hid, [3, 2])           # last check-in was 2 days ago
+    assert db.get_habit_by_id(hid)["current_streak"] == 0   # broken without a freeze
+    db.add_streak_freeze(hid, 1)
+    assert db.use_streak_freeze(hid) is True  # forgive yesterday
+    h = db.get_habit_by_id(hid)
+    assert h["current_streak"] == 2           # streak alive again
+    assert h["completed_count"] == 2          # frozen day is NOT a completion
+    assert h["streak_freeze"] == 0            # token consumed
+
+
+def test_use_freeze_fails_without_tokens(db):
+    hid = db.add_habit("Run", "daily")
+    _seed_history(db, hid, [3, 2])
+    assert db.use_streak_freeze(hid) is False  # no tokens to spend
+
+
+def test_use_freeze_noop_when_not_at_risk(db):
+    hid = db.add_habit("Run", "daily")
+    _seed_history(db, hid, [1, 0])             # checked in yesterday and today
+    db.add_streak_freeze(hid, 1)
+    assert db.use_streak_freeze(hid) is False  # nothing to forgive
+    assert db.get_habit_by_id(hid)["streak_freeze"] == 1  # token not wasted
+
+
+def test_delete_habit_cascades_freezes(db):
+    hid = db.add_habit("Run", "daily")
+    _seed_history(db, hid, [3, 2])
+    db.add_streak_freeze(hid, 1)
+    db.use_streak_freeze(hid)
+    db.delete_habit(hid)
+    db.cursor.execute("SELECT COUNT(*) FROM streak_freezes WHERE habit_id=?", (hid,))
+    assert db.cursor.fetchone()[0] == 0

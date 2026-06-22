@@ -138,6 +138,12 @@ class VitalisDB:
                 calorie_goal INTEGER DEFAULT 2000,
                 doctor_notes TEXT DEFAULT NULL
             );
+            CREATE TABLE IF NOT EXISTS streak_freezes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                habit_id INTEGER,
+                frozen_date DATE,
+                UNIQUE(habit_id, frozen_date)
+            );
         """)
         self.cursor.execute("INSERT OR IGNORE INTO users (id, username) VALUES (1, 'Vitalis User')")
         self.cursor.execute("INSERT OR IGNORE INTO health_profile (user_id) VALUES (1)")
@@ -193,6 +199,8 @@ class VitalisDB:
                 ON habits(user_id);
             CREATE INDEX IF NOT EXISTS idx_badges_user
                 ON badges(user_id);
+            CREATE INDEX IF NOT EXISTS idx_freezes_habit
+                ON streak_freezes(habit_id);
         """)
         self.conn.commit()
 
@@ -269,6 +277,7 @@ class VitalisDB:
         self.cursor.execute("DELETE FROM habit_history WHERE habit_id=?", (habit_id,))
         self.cursor.execute("DELETE FROM daily_challenge WHERE habit_id=?", (habit_id,))
         self.cursor.execute("DELETE FROM social_duels WHERE habit_id=?", (habit_id,))
+        self.cursor.execute("DELETE FROM streak_freezes WHERE habit_id=?", (habit_id,))
         self.cursor.execute("DELETE FROM habits WHERE id=?", (habit_id,))
         self.conn.commit()
 
@@ -307,48 +316,63 @@ class VitalisDB:
     _STREAK_GAP = {"daily": 1, "weekly": 7, "monthly": 31}
 
     @staticmethod
-    def _streak_runs(dates, gap):
-        """Given sorted distinct dates, return (longest_streak, current_streak).
+    def _parse_date(raw):
+        try:
+            return datetime.strptime(str(raw)[:10], "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            return None
 
-        `current_streak` is the run ending at the most recent check-in, but only
-        if that check-in is still within `gap` days of today (otherwise 0).
+    @staticmethod
+    def _streak_runs(entries, gap):
+        """Given a sorted timeline of (date, is_real) entries, return
+        (longest_streak, current_streak).
+
+        Frozen days (is_real=False) bridge gaps to keep a streak alive but do
+        not count toward its length. `current_streak` is the trailing run, valid
+        only if the most recent entry is still within `gap` days of today.
         """
-        if not dates:
+        if not entries:
             return 0, 0
-        longest = run = 1
-        for i in range(1, len(dates)):
-            run = run + 1 if 0 < (dates[i] - dates[i - 1]).days <= gap else 1
+        longest = run = 0
+        prev = None
+        for d, real in entries:
+            if prev is not None and 0 < (d - prev).days <= gap:
+                run += 1 if real else 0
+            else:
+                run = 1 if real else 0
             longest = max(longest, run)
-        current = 1
-        for i in range(len(dates) - 1, 0, -1):
-            if 0 < (dates[i] - dates[i - 1]).days <= gap:
-                current += 1
+            prev = d
+        if (date.today() - entries[-1][0]).days > gap:
+            return longest, 0  # streak window has lapsed
+        current = 0
+        prev = None
+        for d, real in reversed(entries):
+            if prev is None or 0 < (prev - d).days <= gap:
+                current += 1 if real else 0
+                prev = d
             else:
                 break
-        if (date.today() - dates[-1]).days > gap:
-            current = 0  # streak window has lapsed
         return longest, current
 
     def _compute_stats(self, habit_id, frequency):
-        """Derive completion count and streaks from habit_history (source of
-        truth), so the stored columns can never drift out of sync."""
+        """Derive completion stats from habit_history (the source of truth),
+        treating used streak-freeze days as gap-bridging but not completions."""
         self.cursor.execute(
-            "SELECT completed_date FROM habit_history WHERE habit_id=? ORDER BY completed_date",
-            (habit_id,))
-        dates = []
-        for (raw,) in self.cursor.fetchall():
-            try:
-                dates.append(datetime.strptime(str(raw)[:10], "%Y-%m-%d").date())
-            except (ValueError, TypeError):
-                pass
-        dates = sorted(set(dates))
+            "SELECT completed_date FROM habit_history WHERE habit_id=?", (habit_id,))
+        real = {d for (raw,) in self.cursor.fetchall()
+                if (d := self._parse_date(raw)) is not None}
+        self.cursor.execute(
+            "SELECT frozen_date FROM streak_freezes WHERE habit_id=?", (habit_id,))
+        frozen = {d for (raw,) in self.cursor.fetchall()
+                  if (d := self._parse_date(raw)) is not None and d not in real}
         gap = self._STREAK_GAP.get((frequency or "daily").lower(), 1)
-        longest, current = self._streak_runs(dates, gap)
+        entries = sorted([(d, True) for d in real] + [(d, False) for d in frozen])
+        longest, current = self._streak_runs(entries, gap)
         return {
-            "completed_count": len(dates),
+            "completed_count": len(real),
             "current_streak": current,
             "longest_streak": longest,
-            "last_completed": dates[-1].isoformat() if dates else None,
+            "last_completed": max(real).isoformat() if real else None,
         }
 
     def check_habit(self, habit_id, note=None, mood=None, energy=None, value=1, user_id=1):
@@ -379,12 +403,36 @@ class VitalisDB:
         return self.check_habit(habit_id, note=note, user_id=user_id)
 
     def use_streak_freeze(self, habit_id):
+        """Spend freeze tokens to forgive missed periods since the last covered
+        day, recording each forgiven day so the derived streak stays alive.
+        Returns True if at least one missed period was forgiven."""
         h = self.get_habit_by_id(habit_id)
-        if h and h['streak_freeze'] > 0:
-            self.cursor.execute("UPDATE habits SET streak_freeze=streak_freeze-1 WHERE id=?", (habit_id,))
-            self.conn.commit()
-            return True
-        return False
+        if not h or h['streak_freeze'] <= 0:
+            return False
+        step = self._STREAK_GAP.get((h['frequency'] or 'daily').lower(), 1)
+        # Last covered day = latest real check-in or already-frozen day.
+        last_date = self._parse_date(h['last_completed'])
+        self.cursor.execute(
+            "SELECT MAX(frozen_date) FROM streak_freezes WHERE habit_id=?", (habit_id,))
+        max_frozen = self._parse_date(self.cursor.fetchone()[0])
+        if max_frozen and (last_date is None or max_frozen > last_date):
+            last_date = max_frozen
+        if last_date is None:
+            return False  # nothing to protect yet
+        used = 0
+        next_date = last_date + timedelta(days=step)
+        while next_date < date.today() and used < h['streak_freeze']:
+            self.cursor.execute(
+                "INSERT OR IGNORE INTO streak_freezes (habit_id, frozen_date) VALUES (?,?)",
+                (habit_id, next_date))
+            used += 1
+            next_date += timedelta(days=step)
+        if used == 0:
+            return False  # streak not at risk
+        self.cursor.execute(
+            "UPDATE habits SET streak_freeze=streak_freeze-? WHERE id=?", (used, habit_id))
+        self.conn.commit()
+        return True
 
     def add_streak_freeze(self, habit_id, n=1):
         self.cursor.execute("UPDATE habits SET streak_freeze=streak_freeze+? WHERE id=?", (n, habit_id))

@@ -5,6 +5,9 @@ import json
 import os
 from datetime import datetime, timedelta, date
 
+# Explicit date adapter — the default one is deprecated in Python 3.12.
+sqlite3.register_adapter(date, lambda d: d.isoformat())
+
 class VitalisDB:
     def __init__(self, db_path="vitalis.db"):
         self.db_path = db_path
@@ -13,6 +16,7 @@ class VitalisDB:
         self.cursor = self.conn.cursor()
         self.create_tables()
         self.migrate()
+        self._ensure_indexes()
 
     def create_tables(self):
         self.cursor.executescript("""
@@ -172,6 +176,26 @@ class VitalisDB:
                 pass
         self.conn.commit()
 
+    def _ensure_indexes(self):
+        # Remove any pre-existing duplicate check-ins so the unique index can be
+        # created on legacy databases (keeps the earliest row per habit/day).
+        self.cursor.execute("""
+            DELETE FROM habit_history WHERE id NOT IN (
+                SELECT MIN(id) FROM habit_history GROUP BY habit_id, completed_date
+            )
+        """)
+        self.cursor.executescript("""
+            CREATE INDEX IF NOT EXISTS idx_history_habit
+                ON habit_history(habit_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_history_unique
+                ON habit_history(habit_id, completed_date);
+            CREATE INDEX IF NOT EXISTS idx_habits_user
+                ON habits(user_id);
+            CREATE INDEX IF NOT EXISTS idx_badges_user
+                ON badges(user_id);
+        """)
+        self.conn.commit()
+
     def _row(self, r):
         return dict(r) if r else None
 
@@ -240,6 +264,11 @@ class VitalisDB:
         self.conn.commit()
 
     def delete_habit(self, habit_id):
+        # Application-level cascade: remove dependent rows so deleting a habit
+        # never leaves orphaned history/challenges/duels behind.
+        self.cursor.execute("DELETE FROM habit_history WHERE habit_id=?", (habit_id,))
+        self.cursor.execute("DELETE FROM daily_challenge WHERE habit_id=?", (habit_id,))
+        self.cursor.execute("DELETE FROM social_duels WHERE habit_id=?", (habit_id,))
         self.cursor.execute("DELETE FROM habits WHERE id=?", (habit_id,))
         self.conn.commit()
 

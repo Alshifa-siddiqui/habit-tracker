@@ -1,4 +1,5 @@
 """Unit tests for the Vitalis database layer (uses an in-memory SQLite DB)."""
+import sqlite3
 from datetime import date, timedelta
 
 import pytest
@@ -75,6 +76,26 @@ def test_delete_habit_by_id(db):
     hid = db.add_habit("Temp", "daily")
     db.delete_habit(hid)
     assert db.get_habit_by_id(hid) is None
+
+
+def test_delete_habit_cascades_history(db):
+    hid = db.add_habit("Temp", "daily")
+    db.check_habit(hid)
+    assert db.get_habit_history(hid)  # has a check-in
+    db.delete_habit(hid)
+    assert db.get_habit_history(hid) == []  # no orphaned rows
+
+
+def test_duplicate_checkin_blocked_at_db_level(db):
+    hid = db.add_habit("Temp", "daily")
+    today = date.today()
+    db.cursor.execute(
+        "INSERT INTO habit_history (habit_id, completed_date) VALUES (?, ?)",
+        (hid, today))
+    with pytest.raises(sqlite3.IntegrityError):
+        db.cursor.execute(
+            "INSERT INTO habit_history (habit_id, completed_date) VALUES (?, ?)",
+            (hid, today))
 
 
 def test_longest_streak_tracks_best(db):

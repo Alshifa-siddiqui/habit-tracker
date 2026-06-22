@@ -6,7 +6,7 @@ from gui import HabitTrackerGUI
 
 def main():
     db = HabitDatabase()
-    analytics = HabitAnalytics()
+    analytics = HabitAnalytics(db)
     user_id = 1
     users = db.get_users()
     print("\n✦ VITALIS — Habit Tracker")

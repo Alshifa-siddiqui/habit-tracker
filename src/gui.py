@@ -106,7 +106,7 @@ class VitalisApp:
     def __init__(self, root, user_id=1):
         self.root = root
         self.db = HabitDatabase()
-        self.analytics = HabitAnalytics()
+        self.analytics = HabitAnalytics(self.db)
         self.user_id = user_id
         self._habits_cache = []
         self.selected_habit = None

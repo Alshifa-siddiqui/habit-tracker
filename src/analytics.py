@@ -5,8 +5,10 @@ from collections import Counter
 from database import HabitDatabase
 
 class HabitAnalytics:
-    def __init__(self):
-        self.db = HabitDatabase()
+    def __init__(self, db=None):
+        # Accept a shared database instance; only create one as a fallback so
+        # the CLI and GUI don't open a second connection to the same file.
+        self.db = db or HabitDatabase()
 
     def get_longest_streak(self, habit_id):
         history = self.db.get_habit_history(habit_id)

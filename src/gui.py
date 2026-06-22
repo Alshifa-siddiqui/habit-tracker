@@ -112,6 +112,7 @@ class VitalisApp:
         self.selected_habit = None
         self.selected_char = "warrior"
         self.selected_pet  = "dragon"
+        self._reminded = set()  # (habit_id, "YYYY-MM-DD HH:MM") already notified
         self.root.title("Vitalis — Premium Habit Tracker")
         self.root.geometry("1280x800")
         self.root.minsize(1100,700)
@@ -119,6 +120,7 @@ class VitalisApp:
         self._setup_styles()
         self._build_ui()
         self._refresh()
+        self._start_reminder_loop()
 
     def _setup_styles(self):
         s = ttk.Style(); s.theme_use("clam")
@@ -336,6 +338,7 @@ class VitalisApp:
             ("📈 Plot",lambda: self.analytics.plot_habit_progress(h["id"]),P["purple_dark"]),
             ("🌡️ Heatmap",lambda: self.analytics.plot_heatmap(h["id"]),P["purple_dark"]),
             ("🎯 Challenge",lambda: self._set_challenge(h),P["gold_dark"]),
+            ("🔔 Test",lambda: self._fire_reminder(h),P["info"]),
         ]:
             GlowButton(bb,text,cmd,accent=acc).pack(side="left",padx=4)
         GlowButton(bb,"🗑 Delete",lambda: self._delete(h),accent=P["danger"]).pack(side="right",padx=4)
@@ -778,6 +781,63 @@ class VitalisApp:
         # currently on screen. The rest rebuild lazily when the user opens them.
         self._dirty = set(self._tab_refreshers)
         self._refresh_current_tab()
+
+    # REMINDERS
+    @staticmethod
+    def _reminder_due(habit, now_hhmm, today_iso):
+        """Pure check: is this habit due for a reminder at now_hhmm today?"""
+        rt = (habit.get("reminder_time") or "").strip()
+        if not rt or rt != now_hhmm:
+            return False
+        if habit.get("archived"):
+            return False
+        # already completed today -> no nag
+        return str(habit.get("last_completed") or "")[:10] != today_iso
+
+    def _start_reminder_loop(self):
+        self._check_reminders()
+
+    def _check_reminders(self):
+        now = datetime.now()
+        now_hhmm = now.strftime("%H:%M")
+        today_iso = date.today().isoformat()
+        for h in self._habits_cache:
+            key = (h["id"], f"{today_iso} {now_hhmm}")
+            if key in self._reminded:
+                continue
+            if self._reminder_due(h, now_hhmm, today_iso):
+                self._reminded.add(key)
+                self._fire_reminder(h)
+        # re-check every 30s so we never miss a minute boundary
+        try:
+            self.root.after(30000, self._check_reminders)
+        except Exception:
+            pass
+
+    def _fire_reminder(self, habit):
+        title = "⏰ Vitalis Reminder"
+        msg = f"Time for '{habit['name']}' — keep your streak alive!"
+        # Best-effort native OS toast (optional dependency); never fatal.
+        try:
+            from plyer import notification
+            notification.notify(title=title, message=msg, app_name="Vitalis", timeout=10)
+        except Exception:
+            pass
+        # Guaranteed in-app popup.
+        try:
+            popup = tk.Toplevel(self.root)
+            popup.title("Reminder")
+            popup.configure(bg=P["surface2"])
+            popup.attributes("-topmost", True)
+            popup.geometry(f"320x130+{self.root.winfo_x()+480}+{self.root.winfo_y()+40}")
+            tk.Label(popup, text=title, bg=P["surface2"], fg=P["gold"],
+                     font=("Georgia", 15, "bold")).pack(pady=(16, 4))
+            tk.Label(popup, text=msg, bg=P["surface2"], fg=P["text"], font=FONT_BODY,
+                     wraplength=280, justify="center").pack(padx=12)
+            GlowButton(popup, "Got it", popup.destroy, accent=P["purple"]).pack(pady=12)
+            popup.after(15000, popup.destroy)
+        except Exception:
+            pass
 
 class HabitTrackerGUI(VitalisApp):
     pass

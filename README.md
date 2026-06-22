@@ -19,15 +19,18 @@ This project is part of the **"Object-Oriented and Functional Programming with P
 ```sh
 habit-tracker/
 ├── src/
-│   ├── app.py                # Main script for running the application
-│   ├── database.py           # Handles SQLite database interactions
-│   ├── habit.py              # Defines the Habit class and its methods
-│   ├── analytics.py          # Functional programming logic for habit analysis
-│   ├── gui.py                # Manages the Tkinter-based UI
+│   ├── app.py                # CLI entry point / main menu
+│   ├── database.py           # SQLite data layer (VitalisDB)
+│   ├── analytics.py          # Functional analytics: streaks, rates, charts
+│   ├── medical.py            # General wellness insights (pure functions)
+│   ├── rpg.py                # Gamification: characters, bosses, pets, gear
+│   ├── gui.py                # Tkinter desktop UI
 │
 ├── tests/
-│   ├── test_habit.py         # Unit tests for the Habit class
-│   ├── test_database.py      # Tests for database queries
+│   ├── test_database.py      # Data-layer tests (CRUD, check-ins, streaks)
+│   ├── test_medical.py       # Wellness insight function tests
+│
+├── pytest.ini                # Test config (adds src/ to import path)
 │
 ├── docs/                     # Documentation and diagrams
 │   ├── user_flowchart.png     # User interaction flowchart
@@ -137,10 +140,10 @@ pytest
 ```
 
 ### **2️⃣ Test Coverage**
-✔ Habit Creation  
-✔ Habit Completion Tracking  
-✔ Database Connectivity  
-✔ Analytics & Streak Calculation  
+✔ Habit Creation, Update & Deletion  
+✔ Check-ins (XP + badge awards, once-per-day guard)  
+✔ Streak Calculation (continuation & reset by frequency)  
+✔ Wellness Insight Functions  
 
 ---
 

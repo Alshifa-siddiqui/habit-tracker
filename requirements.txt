@@ -1,23 +1,10 @@
-# Specify Python version if needed
-python==3.12
+# Runtime dependencies
+numpy~=1.26.4          # used by analytics (heatmap grid, bar positions)
+matplotlib~=3.9.2      # charts, heatmap, progress plots
 
-# Database
-sqlite3  # Built-in with Python, but listed for clarity
-
-# UI (if using Tkinter)
-tk  # Required only if using a GUI
-
-# Data Analysis & Visualization
-numpy~=1.26.4
-pandas~=2.1.4
-matplotlib~=3.9.2
-
-# Testing & Code Coverage
+# Testing
 pytest~=7.4.4
-coverage~=7.4.3  # For measuring test coverage
+coverage~=7.4.3
 
-# Logging & Debugging (Optional)
-logging  # Built-in, no need to install separately
-
-# User Input Handling (If needed)
-questionary~=2.0.1  # Helps with CLI interactive prompts
+# NOTE: sqlite3, tkinter, datetime, csv, json and logging are part of the
+# Python 3.12 standard library and are NOT installed via pip.

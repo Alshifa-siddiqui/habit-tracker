@@ -206,6 +206,34 @@ class VitalisApp:
         self.nb.add(self.tab_badges,   text="🏅  Badges")
         self._build_stats_tab()
         self._build_calendar_tab()
+        # Lazy refresh: each dynamic tab is rebuilt only when it is the visible
+        # tab, instead of rebuilding all tabs on every action.
+        self._tab_refreshers = {
+            self.tab_home:    self._refresh_home,
+            self.tab_detail:  self._refresh_detail,
+            self.tab_rpg:     self._refresh_rpg,
+            self.tab_medical: self._refresh_medical,
+            self.tab_badges:  self._refresh_badges,
+        }
+        self._dirty = set()
+        self.nb.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+
+    def _current_tab(self):
+        try:
+            return self.nb.nametowidget(self.nb.select())
+        except Exception:
+            return None
+
+    def _refresh_current_tab(self):
+        """Rebuild the visible tab only if its data is marked stale."""
+        tab = self._current_tab()
+        fn = self._tab_refreshers.get(tab)
+        if fn and tab in self._dirty:
+            fn()
+            self._dirty.discard(tab)
+
+    def _on_tab_changed(self, event=None):
+        self._refresh_current_tab()
 
     # HOME
     def _refresh_home(self):
@@ -283,8 +311,9 @@ class VitalisApp:
     # DETAIL
     def _open_detail(self, habit):
         self.selected_habit = habit
-        self._refresh_detail()
+        self._dirty.add(self.tab_detail)
         self.nb.select(self.tab_detail)
+        self._refresh_current_tab()  # handles the case where Detail is already open
 
     def _refresh_detail(self):
         for w in self.tab_detail.winfo_children(): w.destroy()
@@ -741,11 +770,10 @@ class VitalisApp:
             self.cal_combo["values"]=names
             if names and not self.cal_var.get(): self.cal_var.set(names[0])
             self._draw_calendar()
-        self._refresh_home()
-        self._refresh_rpg()
-        self._refresh_medical()
-        self._refresh_badges()
-        if self.selected_habit: self._refresh_detail()
+        # Data changed: mark every dynamic tab stale, then rebuild just the one
+        # currently on screen. The rest rebuild lazily when the user opens them.
+        self._dirty = set(self._tab_refreshers)
+        self._refresh_current_tab()
 
 class HabitTrackerGUI(VitalisApp):
     pass

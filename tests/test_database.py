@@ -38,30 +38,47 @@ def test_check_habit_blocks_second_checkin_same_day(db):
         db.check_habit(hid)
 
 
-def test_streak_continues_when_within_gap(db):
+def _seed_history(db, habit_id, days_ago):
+    """Insert check-in rows N days before today (derived stats read these)."""
+    for n in days_ago:
+        d = (date.today() - timedelta(days=n)).isoformat()
+        db.cursor.execute(
+            "INSERT OR IGNORE INTO habit_history (habit_id, completed_date) VALUES (?, ?)",
+            (habit_id, d))
+    db.conn.commit()
+
+
+def test_current_streak_counts_consecutive_days(db):
     hid = db.add_habit("Reading", "daily")
-    # Simulate a check-in yesterday with a streak of 5.
-    yesterday = date.today() - timedelta(days=1)
-    db.update_habit(hid, last_completed=yesterday.isoformat(), current_streak=5)
-    db.check_habit(hid)
-    assert db.get_habit_by_id(hid)["current_streak"] == 6
+    _seed_history(db, hid, [2, 1, 0])  # three consecutive days incl. today
+    assert db.get_habit_by_id(hid)["current_streak"] == 3
 
 
-def test_streak_resets_after_missed_day(db):
+def test_current_streak_zero_when_window_lapsed(db):
     hid = db.add_habit("Walking", "daily")
-    # Last check-in was 3 days ago — the daily streak should reset.
-    long_ago = date.today() - timedelta(days=3)
-    db.update_habit(hid, last_completed=long_ago.isoformat(), current_streak=9)
-    db.check_habit(hid)
-    assert db.get_habit_by_id(hid)["current_streak"] == 1
+    _seed_history(db, hid, [5, 4, 3])  # 3-day run, but last was 3 days ago
+    h = db.get_habit_by_id(hid)
+    assert h["current_streak"] == 0    # broken: missed the daily window
+    assert h["longest_streak"] == 3    # best run still reported
+
+
+def test_checkin_extends_streak_from_history(db):
+    hid = db.add_habit("Daily", "daily")
+    _seed_history(db, hid, [1])        # checked in yesterday
+    db.check_habit(hid)               # check in today
+    assert db.get_habit_by_id(hid)["current_streak"] == 2
 
 
 def test_weekly_streak_allows_seven_day_gap(db):
     hid = db.add_habit("Weekly Review", "weekly")
-    week_ago = date.today() - timedelta(days=7)
-    db.update_habit(hid, last_completed=week_ago.isoformat(), current_streak=2)
-    db.check_habit(hid)
+    _seed_history(db, hid, [14, 7, 0])  # once a week incl. today
     assert db.get_habit_by_id(hid)["current_streak"] == 3
+
+
+def test_completed_count_derived_from_history(db):
+    hid = db.add_habit("Counter", "daily")
+    _seed_history(db, hid, [3, 2, 1, 0])
+    assert db.get_habit_by_id(hid)["completed_count"] == 4
 
 
 def test_update_habit_changes_fields(db):
@@ -98,10 +115,7 @@ def test_duplicate_checkin_blocked_at_db_level(db):
             (hid, today))
 
 
-def test_longest_streak_tracks_best(db):
+def test_longest_streak_tracks_best_run(db):
     hid = db.add_habit("Pushups", "daily")
-    yesterday = date.today() - timedelta(days=1)
-    db.update_habit(hid, last_completed=yesterday.isoformat(),
-                    current_streak=10, longest_streak=10)
-    db.check_habit(hid)
-    assert db.get_habit_by_id(hid)["longest_streak"] == 11
+    _seed_history(db, hid, [10, 9, 8, 5, 0])  # runs of length 3, 1, 1
+    assert db.get_habit_by_id(hid)["longest_streak"] == 3

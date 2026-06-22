@@ -290,36 +290,66 @@ class VitalisDB:
             p.append(category)
         q += " ORDER BY category, name"
         self.cursor.execute(q, p)
-        return [dict(r) for r in self.cursor.fetchall()]
+        habits = [dict(r) for r in self.cursor.fetchall()]
+        for h in habits:
+            h.update(self._compute_stats(h["id"], h.get("frequency")))
+        return habits
 
     def get_habit_by_id(self, habit_id):
         self.cursor.execute("SELECT * FROM habits WHERE id=?", (habit_id,))
-        return self._row(self.cursor.fetchone())
+        row = self._row(self.cursor.fetchone())
+        if row:
+            row.update(self._compute_stats(habit_id, row.get("frequency")))
+        return row
 
     # CHECK-IN
     # Allowed days between check-ins for the streak to continue, per frequency.
     _STREAK_GAP = {"daily": 1, "weekly": 7, "monthly": 31}
 
-    def _next_streak(self, habit, today):
-        """Return the streak value after a check-in on `today`.
+    @staticmethod
+    def _streak_runs(dates, gap):
+        """Given sorted distinct dates, return (longest_streak, current_streak).
 
-        Continues the existing streak when the previous check-in is within the
-        frequency's allowed gap; otherwise restarts at 1.
+        `current_streak` is the run ending at the most recent check-in, but only
+        if that check-in is still within `gap` days of today (otherwise 0).
         """
-        last = habit.get("last_completed")
-        last_date = None
-        if last:
+        if not dates:
+            return 0, 0
+        longest = run = 1
+        for i in range(1, len(dates)):
+            run = run + 1 if 0 < (dates[i] - dates[i - 1]).days <= gap else 1
+            longest = max(longest, run)
+        current = 1
+        for i in range(len(dates) - 1, 0, -1):
+            if 0 < (dates[i] - dates[i - 1]).days <= gap:
+                current += 1
+            else:
+                break
+        if (date.today() - dates[-1]).days > gap:
+            current = 0  # streak window has lapsed
+        return longest, current
+
+    def _compute_stats(self, habit_id, frequency):
+        """Derive completion count and streaks from habit_history (source of
+        truth), so the stored columns can never drift out of sync."""
+        self.cursor.execute(
+            "SELECT completed_date FROM habit_history WHERE habit_id=? ORDER BY completed_date",
+            (habit_id,))
+        dates = []
+        for (raw,) in self.cursor.fetchall():
             try:
-                last_date = datetime.strptime(str(last)[:10], "%Y-%m-%d").date()
-            except ValueError:
-                last_date = None
-        if last_date is None:
-            return 1
-        gap = self._STREAK_GAP.get((habit.get("frequency") or "daily").lower(), 1)
-        delta = (today - last_date).days
-        if 0 < delta <= gap:
-            return habit["current_streak"] + 1
-        return 1
+                dates.append(datetime.strptime(str(raw)[:10], "%Y-%m-%d").date())
+            except (ValueError, TypeError):
+                pass
+        dates = sorted(set(dates))
+        gap = self._STREAK_GAP.get((frequency or "daily").lower(), 1)
+        longest, current = self._streak_runs(dates, gap)
+        return {
+            "completed_count": len(dates),
+            "current_streak": current,
+            "longest_streak": longest,
+            "last_completed": dates[-1].isoformat() if dates else None,
+        }
 
     def check_habit(self, habit_id, note=None, mood=None, energy=None, value=1, user_id=1):
         today = date.today()
@@ -333,14 +363,8 @@ class VitalisDB:
         self.cursor.execute(
             "INSERT INTO habit_history (habit_id,user_id,completed_date,value,note,mood,energy) VALUES (?,?,?,?,?,?,?)",
             (habit_id, user_id, today, value, note, mood, energy))
-        # Streak honors frequency: a check-in continues the streak only if the
-        # previous one falls within the allowed gap, otherwise the streak resets.
-        new_streak = self._next_streak(habit, today)
-        new_longest = max(habit['longest_streak'], new_streak)
-        self.cursor.execute(
-            "UPDATE habits SET completed_count=completed_count+1, last_completed=?, "
-            "current_streak=?, longest_streak=? WHERE id=?",
-            (today, new_streak, new_longest, habit_id))
+        # completed_count / current_streak / longest_streak are derived from
+        # habit_history on read (see _compute_stats), so nothing to update here.
         self.conn.commit()
         xp = habit['xp_reward'] * habit['difficulty']
         self.add_xp(user_id, xp)
